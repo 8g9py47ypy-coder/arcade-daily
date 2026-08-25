@@ -1,0 +1,18 @@
+{
+  "name": "Daily Arcade | Guess the Number",
+  "short_name": "Daily Arcade",
+  "description": "A daily arcade of quick mini-games.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#172321",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

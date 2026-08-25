@@ -1,0 +1,117 @@
+{
+  "challenge": {
+    "date": "2026-08-25",
+    "target": 29
+  },
+  "players": {
+    "_yYPPV1mQgYVZyjMwCcRKKR1": {
+      "name": "Menu Tester",
+      "daily": {
+        "date": "2026-08-25",
+        "moves": 1,
+        "guesses": [
+          {
+            "value": 1,
+            "hint": "Go higher"
+          }
+        ],
+        "completed": false
+      }
+    },
+    "W4plBb3Cj7wF0d12k0Lw131W": {
+      "name": "creator",
+      "daily": {
+        "date": "2026-08-25",
+        "moves": 6,
+        "guesses": [
+          {
+            "value": 20,
+            "hint": "Go higher"
+          },
+          {
+            "value": 50,
+            "hint": "Go lower"
+          },
+          {
+            "value": 35,
+            "hint": "Go lower"
+          },
+          {
+            "value": 27,
+            "hint": "Go higher"
+          },
+          {
+            "value": 31,
+            "hint": "Go lower"
+          },
+          {
+            "value": 29,
+            "hint": "Correct"
+          }
+        ],
+        "completed": true
+      },
+      "higherLower": {
+        "date": "2026-08-25",
+        "current": 100,
+        "score": 0,
+        "history": [
+          {
+            "from": 100,
+            "to": 39,
+            "prediction": "higher",
+            "correct": false
+          }
+        ],
+        "completed": true
+      }
+    },
+    "HciTklfTSYAQvSAqDiExJaec": {
+      "name": "cmcc",
+      "daily": null,
+      "higherLower": {
+        "date": "2026-08-25",
+        "current": 43,
+        "score": 0,
+        "history": [],
+        "scores": [
+          8,
+          1,
+          0,
+          1,
+          1,
+          3
+        ],
+        "completed": false
+      },
+      "isCreator": true,
+      "wordGame": {
+        "date": "2026-08-25",
+        "current": "bamboo",
+        "seen": [
+          "bamboo",
+          "otter"
+        ],
+        "newSinceRepeat": 2,
+        "currentIsRepeat": true,
+        "history": [
+          {
+            "word": "bamboo",
+            "answer": "new",
+            "correct": true
+          },
+          {
+            "word": "otter",
+            "answer": "new",
+            "correct": true
+          }
+        ],
+        "score": 2,
+        "scores": [
+          47
+        ],
+        "completed": false
+      }
+    }
+  }
+}

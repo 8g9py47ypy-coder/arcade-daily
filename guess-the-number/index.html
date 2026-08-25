@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f1e8" />
+  <meta name="description" content="Daily Arcade is a collection of quick daily mini-games, including Rangefinder, Higher or Lower, and Word Watch." />
+  <meta name="keywords" content="Daily Arcade, Rangefinder, Higher or Lower, Word Watch, daily mini-games" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Daily Arcade | Daily Mini-Games" />
+  <meta property="og:description" content="Play quick daily mini-games and compete on the leaderboards." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>Daily Arcade | Guess the Number</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Daily Arcade",
+      "description": "A collection of quick daily mini-games with leaderboards.",
+      "genre": ["Puzzle", "Casual Game"],
+      "gamePlatform": "Web browser",
+      "applicationCategory": "Game"
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --ink: #172321;
+      --muted: #66716c;
+      --paper: #f5f1e8;
+      --panel: #fffdf8;
+      --line: #d8d7cc;
+      --coral: #f2674a;
+      --coral-dark: #cc4d35;
+      --teal: #2d8c82;
+      --teal-pale: #e1f0eb;
+      --yellow: #f1c453;
+      --shadow: 0 22px 60px rgba(37, 51, 46, 0.11);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(45, 140, 130, .12) 1px, transparent 1px);
+      background-size: 18px 18px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    .view-hidden { display: none !important; }
+
+    .shell {
+      width: min(1080px, calc(100% - 40px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 34px 0 42px;
+      display: flex;
+      flex-direction: column;
+      filter: brightness(var(--brightness, 1));
+    }
+
+    .menu-view { flex: 1; display: grid; place-items: center; padding: 30px 0 50px; }
+    .menu-content { width: min(100%, 620px); text-align: center; }
+    .menu-creator-badge { display: inline-block; margin-bottom: 12px; }
+    .menu-kicker { color: var(--coral); font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; }
+    .menu-title { max-width: none; margin: 15px 0 12px; color: var(--ink); font-size: clamp(4rem, 12vw, 8rem); line-height: .82; letter-spacing: -.09em; }
+    .menu-copy { margin: 0 auto 34px; color: var(--muted); font-size: .95rem; }
+    .name-form { display: flex; max-width: 430px; margin: 0 auto 16px; gap: 10px; }
+    .name-form input { padding: 16px; }
+    .name-form button { padding: 0 20px; color: white; background: var(--coral); }
+    .menu-action { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; color: var(--ink); background: var(--yellow); }
+    .menu-games { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .menu-games .menu-action { min-width: 190px; }
+    .menu-action:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+    .menu-status { min-height: 22px; margin: 12px 0 22px; color: var(--coral-dark); font-size: .8rem; }
+    .menu-leaderboard { max-width: 430px; margin: 24px auto 0; padding: 20px; text-align: left; background: var(--panel); border: 1px solid var(--line); }
+    .menu-leaderboard h2 { margin: 0 0 14px; font-size: 1.1rem; }
+    .leaderboard-toggle { display: flex; gap: 6px; margin-bottom: 16px; }
+    .leaderboard-toggle button { flex: 1; padding: 10px 8px; color: var(--muted); background: var(--teal-pale); font-size: .72rem; }
+    .leaderboard-toggle button[aria-pressed="true"] { color: white; background: var(--teal); }
+    .settings-panel { max-width: 430px; margin: 24px auto 0; padding: 20px; text-align: left; background: var(--panel); border: 1px solid var(--line); }
+    .settings-panel h2 { margin: 0 0 18px; font-size: 1.1rem; }
+    .setting { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid var(--line); font-size: .83rem; }
+    .setting input[type="range"] { width: 150px; accent-color: var(--coral); }
+    .setting input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--teal); }
+    .settings-name { display: flex; gap: 8px; margin-top: 15px; }
+    .settings-name input { padding: 10px; font-size: .8rem; }
+    .settings-name button { padding: 0 12px; color: white; background: var(--teal); }
+    .brand-button { padding: 0; color: var(--ink); background: transparent; }
+
+    header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 1.08rem; font-weight: 700; letter-spacing: -.03em; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; color: white; background: var(--ink); border-radius: 50%; font-family: 'DM Mono', monospace; font-size: .75rem; }
+    .creator-badge { margin-left: 4px; padding: 5px 7px; color: var(--ink); background: var(--yellow); font: 500 .62rem 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .best-score { color: var(--muted); font-family: 'DM Mono', monospace; font-size: .73rem; text-transform: uppercase; letter-spacing: .08em; }
+    .best-score strong { color: var(--ink); font-size: .9rem; }
+
+    main { flex: 1; display: grid; place-items: center; padding: 46px 0 32px; }
+    .layout { width: min(100%, 1100px); display: grid; grid-template-columns: minmax(0, 900px) 240px; gap: 18px; align-items: start; }
+    .game { display: grid; grid-template-columns: 1fr 1.15fr; background: var(--panel); border: 1px solid rgba(23,35,33,.12); box-shadow: var(--shadow); }
+    .intro { position: relative; overflow: hidden; padding: clamp(30px, 5vw, 64px); background: var(--ink); color: #f8f4e9; }
+    .intro::after { content: ''; position: absolute; width: 210px; height: 210px; right: -82px; bottom: -88px; border: 1px solid rgba(241,196,83,.5); border-radius: 50%; box-shadow: 0 0 0 22px rgba(241,196,83,.08), 0 0 0 44px rgba(241,196,83,.05); }
+    .eyebrow { color: var(--yellow); font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 320px; margin: 18px 0 22px; font-size: clamp(2.7rem, 6vw, 5rem); line-height: .91; letter-spacing: -.075em; }
+    .intro-copy { max-width: 290px; color: #b9c5be; font-size: .95rem; line-height: 1.6; }
+    .range-tag { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 9px; margin-top: 48px; padding: 9px 12px; color: var(--ink); background: var(--yellow); font-family: 'DM Mono', monospace; font-size: .73rem; font-weight: 500; }
+    .range-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+
+    .play { padding: clamp(30px, 5vw, 58px); display: flex; flex-direction: column; justify-content: center; }
+    .identity-form { display: none; gap: 8px; margin-bottom: 28px; }
+    .identity-form label { align-self: center; color: var(--muted); font-family: 'DM Mono', monospace; font-size: .68rem; text-transform: uppercase; }
+    .identity-form input { padding: 9px 10px; font-size: .78rem; }
+    .identity-form button { padding: 0 12px; color: var(--ink); background: var(--teal-pale); font-size: .72rem; }
+    .identity-form button:hover { background: #cce4dd; }
+    .status-row { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 34px; }
+    .status-label { color: var(--muted); font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; }
+    .moves { text-align: right; font-family: 'DM Mono', monospace; font-size: .76rem; }
+    .moves strong { display: block; color: var(--coral); font-size: 1.45rem; line-height: 1; }
+    .message { min-height: 62px; margin-bottom: 25px; }
+    .message h2 { margin: 0 0 8px; font-size: clamp(1.55rem, 3vw, 2.15rem); letter-spacing: -.055em; }
+    .message p { margin: 0; color: var(--muted); font-size: .92rem; }
+    .message.success h2 { color: var(--teal); }
+    .message.warning h2 { color: var(--coral-dark); }
+    .guess-form { display: flex; gap: 10px; }
+    input { width: 100%; min-width: 0; padding: 16px 17px; border: 1px solid var(--line); border-radius: 0; outline: none; color: var(--ink); background: #fbfaf5; font: 500 1rem 'DM Mono', monospace; transition: border-color .2s, box-shadow .2s; }
+    input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(45,140,130,.15); }
+    button { border: 0; border-radius: 0; cursor: pointer; font: 600 .83rem 'Space Grotesk', sans-serif; transition: transform .18s, background .18s; }
+    button:hover { transform: translateY(-2px); }
+    .guess-button { padding: 0 23px; color: white; background: var(--coral); }
+    .guess-button:hover { background: var(--coral-dark); }
+    .history-title { display: flex; justify-content: space-between; margin-top: 42px; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-family: 'DM Mono', monospace; font-size: .67rem; letter-spacing: .1em; text-transform: uppercase; }
+    .history { min-height: 94px; max-height: 150px; overflow-y: auto; }
+    .empty-history { color: #98a19b; font-size: .85rem; padding-top: 18px; }
+    .history-item { display: flex; justify-content: space-between; padding: 11px 2px; border-bottom: 1px solid #ecebe3; font-family: 'DM Mono', monospace; font-size: .8rem; animation: appear .25s ease-out both; }
+    .history-item span:last-child { color: var(--muted); }
+    .reset { align-self: flex-start; margin-top: 28px; padding: 0; color: var(--teal); background: transparent; font-size: .78rem; text-decoration: underline; text-underline-offset: 4px; }
+    .reset:hover { color: var(--ink); }
+    .leaderboard { padding: 24px 20px; color: var(--ink); background: var(--panel); border: 1px solid rgba(23,35,33,.12); box-shadow: var(--shadow); }
+    .leaderboard h2 { margin: 0 0 5px; font-size: 1.15rem; letter-spacing: -.04em; }
+    .leaderboard-date { margin: 0 0 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: .64rem; text-transform: uppercase; }
+    .leaderboard-list { margin: 0; padding: 0; list-style: none; }
+    .leaderboard-list li { display: grid; grid-template-columns: 24px 1fr auto; gap: 7px; padding: 10px 0; border-top: 1px solid var(--line); font-family: 'DM Mono', monospace; font-size: .72rem; }
+    .leaderboard-list li:first-child { border-top-color: var(--coral); }
+    .leaderboard-list .rank { color: var(--coral); }
+    .leaderboard-list .score { color: var(--muted); }
+    .leaderboard-empty { color: #98a19b; font-size: .8rem; line-height: 1.45; }
+    .player-note { margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .72rem; line-height: 1.45; }
+    .higher-lower { width: min(100%, 680px); padding: clamp(30px, 6vw, 65px); text-align: center; background: var(--panel); border: 1px solid rgba(23,35,33,.12); box-shadow: var(--shadow); }
+    .higher-lower h1 { max-width: none; margin: 15px 0 12px; font-size: clamp(2.5rem, 7vw, 5.5rem); }
+    .number-display { margin: 30px 0; color: var(--teal); font: 500 clamp(4rem, 12vw, 8rem)/.8 'DM Mono', monospace; }
+    .prediction-buttons { display: flex; justify-content: center; gap: 10px; }
+    .prediction-buttons button { min-width: 145px; padding: 16px 20px; color: white; background: var(--coral); }
+    .prediction-buttons button:last-child { background: var(--teal); }
+    .prediction-buttons button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .retry-button { margin-top: 18px; padding: 12px 18px; color: var(--ink); background: var(--yellow); }
+    .higher-message { min-height: 45px; color: var(--muted); font-size: .9rem; }
+    .streak { color: var(--coral); font: 500 .8rem 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .1em; }
+    .higher-history { margin-top: 28px; color: var(--muted); font: .72rem 'DM Mono', monospace; }
+    .word-game { width: min(100%, 680px); padding: clamp(30px, 6vw, 65px); text-align: center; background: var(--panel); border: 1px solid rgba(23,35,33,.12); box-shadow: var(--shadow); }
+    .word-game h1 { max-width: none; margin: 15px 0 12px; font-size: clamp(2.5rem, 7vw, 5.5rem); }
+    .word-display { margin: 38px 0; color: var(--coral); font: 500 clamp(2.8rem, 9vw, 6rem)/.9 'DM Mono', monospace; }
+    .word-buttons { display: flex; justify-content: center; gap: 10px; }
+    .word-buttons button { min-width: 160px; padding: 16px 20px; color: white; background: var(--coral); }
+    .word-buttons button:last-child { background: var(--teal); }
+    .word-buttons button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+    .word-history { margin-top: 28px; color: var(--muted); font: .72rem 'DM Mono', monospace; }
+
+    footer { display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 700px) {
+      .shell { width: min(100% - 26px, 540px); padding-top: 22px; }
+      main { padding: 32px 0 26px; }
+      .layout { grid-template-columns: 1fr; }
+      .game { grid-template-columns: 1fr; }
+      .intro { padding: 34px 30px 30px; }
+      h1 { max-width: 270px; font-size: 3.35rem; }
+      .range-tag { margin-top: 24px; }
+      .play { padding: 32px 30px 35px; }
+      footer { font-size: .6rem; }
+    }
+    @media (max-width: 390px) {
+      .guess-form { flex-direction: column; }
+      .guess-button { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header id="gameHeader" class="view-hidden">
+      <button class="brand brand-button" id="menuButton" type="button"><span class="brand-mark">?</span> Daily Arcade <span class="creator-badge view-hidden" id="creatorBadge">Creator</span></button>
+      <div class="best-score">Best: <strong id="bestScore">--</strong></div>
+    </header>
+
+    <section class="menu-view" id="menuView" aria-label="Main menu">
+      <div class="menu-content">
+        <span class="creator-badge menu-creator-badge view-hidden" id="menuCreatorBadge">Creator</span>
+        <div class="menu-kicker">Daily number challenge</div>
+        <h1 class="menu-title">Daily Arcade</h1>
+        <p class="menu-copy">Find the number. Make your mark.</p>
+        <form class="name-form" id="menuProfileForm">
+          <label for="menuName" hidden>Username</label>
+          <input id="menuName" maxlength="18" placeholder="Choose a username" autocomplete="nickname" required />
+          <label for="creatorCode" hidden>Creator code</label>
+          <input id="creatorCode" maxlength="64" placeholder="Creator code (optional)" autocomplete="off" />
+          <button type="submit">Save name</button>
+        </form>
+        <div class="menu-status" id="menuStatus" aria-live="polite"></div>
+        <div class="menu-games">
+          <button class="menu-action" id="playButton" type="button" disabled>Rangefinder <span aria-hidden="true">→</span></button>
+          <button class="menu-action" id="higherLowerButton" type="button" disabled>Higher or Lower <span aria-hidden="true">→</span></button>
+          <button class="menu-action" id="wordGameButton" type="button" disabled>Word Watch <span aria-hidden="true">→</span></button>
+        </div>
+        <div>
+          <button class="reset" id="leaderboardButton" type="button">Leaderboards</button>
+        </div>
+        <section class="menu-leaderboard view-hidden" id="menuLeaderboard" aria-label="Leaderboards">
+          <h2 id="menuLeaderboardTitle">Rangefinder</h2>
+          <div class="leaderboard-toggle" role="group" aria-label="Choose leaderboard">
+            <button id="rangefinderLeaderboardButton" type="button" aria-pressed="true">Rangefinder</button>
+            <button id="higherLowerLeaderboardButton" type="button" aria-pressed="false">Higher or Lower</button>
+            <button id="wordLeaderboardButton" type="button" aria-pressed="false">Word Watch</button>
+          </div>
+          <p class="leaderboard-date" id="menuLeaderboardDate">Loading...</p>
+          <ol class="leaderboard-list" id="menuLeaderboardList"><li class="leaderboard-empty">Loading players...</li></ol>
+        </section>
+        <div>
+          <button class="reset" id="settingsButton" type="button">Settings</button>
+        </div>
+        <section class="settings-panel view-hidden" id="settingsPanel" aria-label="Settings">
+          <h2>Settings</h2>
+          <label class="setting"><span>Brightness</span><input id="brightnessControl" type="range" min="75" max="125" value="100" /></label>
+          <label class="setting"><span>Reduce motion</span><input id="motionControl" type="checkbox" /></label>
+          <div class="setting"><span>Username</span><div class="settings-name"><input id="settingsName" maxlength="18" placeholder="Change name" /><button id="renameButton" type="button">Save</button></div></div>
+        </section>
+      </div>
+    </section>
+
+    <main id="gameView" class="view-hidden">
+      <div class="layout">
+      <section class="game" aria-label="Guess the number game">
+        <div class="intro">
+          <div class="eyebrow">A tiny test of instinct</div>
+          <h1>Find the hidden number.</h1>
+          <p class="intro-copy">A number is waiting between 1 and 100. Make your move, read the clue, and close in fast.</p>
+          <div class="range-tag">01 — 100</div>
+        </div>
+        <div class="play">
+          <form class="identity-form" id="profileForm">
+            <label for="playerName">Player</label>
+            <input id="playerName" maxlength="18" placeholder="Your name" autocomplete="nickname" required />
+            <button type="submit">Save</button>
+          </form>
+          <div class="status-row">
+            <div class="status-label">Current round</div>
+            <div class="moves"><strong id="moveCount">0</strong> moves</div>
+          </div>
+          <div class="message" id="message" aria-live="polite">
+            <h2>What is your first guess?</h2>
+            <p>Every attempt gets you closer.</p>
+          </div>
+          <form class="guess-form" id="guessForm">
+            <label for="guess" hidden>Your guess</label>
+            <input id="guess" type="number" min="1" max="100" placeholder="Enter 1 — 100" autocomplete="off" required />
+            <button class="guess-button" type="submit">Guess <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="history-title"><span>Previous guesses</span><span id="rangeHint">1 — 100</span></div>
+          <div class="history" id="history"><div class="empty-history">Your trail will appear here.</div></div>
+          <button class="reset" id="resetButton" type="button">Back to main menu</button>
+        </div>
+      </section>
+      <aside class="leaderboard" aria-label="Daily leaderboard">
+        <h2>Today’s board</h2>
+        <p class="leaderboard-date" id="leaderboardDate">Loading...</p>
+        <ol class="leaderboard-list" id="leaderboardList"><li class="leaderboard-empty">Loading players...</li></ol>
+        <p class="player-note">One round per player, per day. Lowest move count wins.</p>
+      </aside>
+      </div>
+    </main>
+    <main id="higherLowerView" class="view-hidden">
+      <section class="higher-lower" aria-label="Higher or Lower game">
+        <div class="menu-kicker">One prediction chain per day</div>
+        <h1>Higher or lower?</h1>
+        <p class="higher-message" id="higherMessage">Will the next number be higher or lower?</p>
+        <div class="number-display" id="higherNumber">--</div>
+        <div class="streak">Streak: <span id="higherScore">0</span></div>
+        <div class="prediction-buttons">
+          <button id="higherButton" type="button">Higher ↑</button>
+          <button id="lowerButton" type="button">Lower ↓</button>
+        </div>
+        <button class="retry-button view-hidden" id="creatorRetryButton" type="button">Try again ↻</button>
+        <div class="higher-history" id="higherHistory"></div>
+        <button class="reset" id="higherMenuButton" type="button">Back to main menu</button>
+      </section>
+    </main>
+    <main id="wordGameView" class="view-hidden">
+      <section class="word-game" aria-label="Word Watch game">
+        <div class="menu-kicker">Spot the repeats</div>
+        <h1>New or already seen?</h1>
+        <p class="higher-message" id="wordMessage">Has this word appeared before?</p>
+        <div class="word-display" id="wordDisplay">--</div>
+        <div class="streak">Score: <span id="wordScore">0</span></div>
+        <div class="word-buttons">
+          <button id="newWordButton" type="button">New word</button>
+          <button id="seenWordButton" type="button">Already seen</button>
+        </div>
+        <button class="retry-button view-hidden" id="wordRetryButton" type="button">Try again ↻</button>
+        <div class="word-history" id="wordHistory"></div>
+        <button class="reset" id="wordMenuButton" type="button">Back to main menu</button>
+      </section>
+    </main>
+    <footer><span>Guess smart. Move less.</span><span>Round <span id="roundNumber">01</span></span></footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('guessForm');
+    const input = document.getElementById('guess');
+    const message = document.getElementById('message');
+    const moveCount = document.getElementById('moveCount');
+    const history = document.getElementById('history');
+    const resetButton = document.getElementById('resetButton');
+    const menuView = document.getElementById('menuView');
+    const gameView = document.getElementById('gameView');
+    const gameHeader = document.getElementById('gameHeader');
+    const menuButton = document.getElementById('menuButton');
+    const menuProfileForm = document.getElementById('menuProfileForm');
+    const menuName = document.getElementById('menuName');
+    const creatorCode = document.getElementById('creatorCode');
+    const menuStatus = document.getElementById('menuStatus');
+    const playButton = document.getElementById('playButton');
+    const higherLowerButton = document.getElementById('higherLowerButton');
+    const wordGameButton = document.getElementById('wordGameButton');
+    const higherLowerView = document.getElementById('higherLowerView');
+    const wordGameView = document.getElementById('wordGameView');
+    const higherNumber = document.getElementById('higherNumber');
+    const higherScore = document.getElementById('higherScore');
+    const higherMessage = document.getElementById('higherMessage');
+    const higherHistory = document.getElementById('higherHistory');
+    const higherButton = document.getElementById('higherButton');
+    const lowerButton = document.getElementById('lowerButton');
+    const creatorRetryButton = document.getElementById('creatorRetryButton');
+    const higherMenuButton = document.getElementById('higherMenuButton');
+    const wordDisplay = document.getElementById('wordDisplay');
+    const wordScore = document.getElementById('wordScore');
+    const wordMessage = document.getElementById('wordMessage');
+    const wordHistory = document.getElementById('wordHistory');
+    const newWordButton = document.getElementById('newWordButton');
+    const seenWordButton = document.getElementById('seenWordButton');
+    const wordRetryButton = document.getElementById('wordRetryButton');
+    const wordMenuButton = document.getElementById('wordMenuButton');
+    const leaderboardButton = document.getElementById('leaderboardButton');
+    const menuLeaderboard = document.getElementById('menuLeaderboard');
+    const menuLeaderboardTitle = document.getElementById('menuLeaderboardTitle');
+    const menuLeaderboardDate = document.getElementById('menuLeaderboardDate');
+    const menuLeaderboardList = document.getElementById('menuLeaderboardList');
+    const rangefinderLeaderboardButton = document.getElementById('rangefinderLeaderboardButton');
+    const higherLowerLeaderboardButton = document.getElementById('higherLowerLeaderboardButton');
+    const wordLeaderboardButton = document.getElementById('wordLeaderboardButton');
+    const settingsButton = document.getElementById('settingsButton');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const brightnessControl = document.getElementById('brightnessControl');
+    const motionControl = document.getElementById('motionControl');
+    const settingsName = document.getElementById('settingsName');
+    const renameButton = document.getElementById('renameButton');
+    const profileForm = document.getElementById('profileForm');
+    const playerName = document.getElementById('playerName');
+    const leaderboardDate = document.getElementById('leaderboardDate');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const rangeHint = document.getElementById('rangeHint');
+    const roundNumber = document.getElementById('roundNumber');
+    const creatorBadge = document.getElementById('creatorBadge');
+    const menuCreatorBadge = document.getElementById('menuCreatorBadge');
+
+    let moves;
+    let lowerBound;
+    let upperBound;
+    let gameOver = false;
+    let hasName = false;
+    let menuLeaderboardMode = 'rangefinder';
+    let latestState;
+
+    async function request(url, options) {
+      const response = await fetch(url, options);
+      const body = await response.json();
+      if (!response.ok) throw Object.assign(new Error(body.error || 'Something went wrong.'), { body });
+      return body;
+    }
+
+    function showMessage(title, detail, kind) {
+      message.className = 'message ' + (kind || '');
+      message.innerHTML = '<h2>' + title + '</h2><p>' + detail + '</p>';
+    }
+
+    function renderHistory(guesses) {
+      history.innerHTML = guesses.length ? guesses.slice().reverse().map((guess, index) => '<div class="history-item"><span>Move ' + (guesses.length - index) + ' &nbsp;·&nbsp; ' + guess.value + '</span><span>' + guess.hint + '</span></div>').join('') : '<div class="empty-history">Your trail will appear here.</div>';
+    }
+
+    function renderLeaderboard(players) {
+      leaderboardList.innerHTML = players.length ? players.map((player) => '<li><span class="rank">' + String(player.rank).padStart(2, '0') + '</span><span>' + escapeHtml(player.name) + '</span><span class="score">' + player.moves + '</span></li>').join('') : '<li class="leaderboard-empty">No finished rounds yet today.</li>';
+    }
+
+    function renderMenuLeaderboard() {
+      if (!latestState) return;
+      const higherLower = menuLeaderboardMode === 'higherLower';
+      const wordGame = menuLeaderboardMode === 'wordGame';
+      const players = wordGame ? latestState.wordGame.leaderboard : higherLower ? latestState.higherLower.leaderboard : latestState.leaderboard;
+      menuLeaderboardTitle.textContent = wordGame ? 'Word Watch' : higherLower ? 'Higher or Lower' : 'Rangefinder';
+      menuLeaderboardDate.textContent = latestState.date;
+      menuLeaderboardList.innerHTML = players.length ? players.map((player) => '<li><span class="rank">' + String(player.rank).padStart(2, '0') + '</span><span>' + escapeHtml(player.name) + '</span><span class="score">' + (higherLower || wordGame ? player.score : player.moves) + '</span></li>').join('') : '<li class="leaderboard-empty">No finished rounds yet today.</li>';
+      rangefinderLeaderboardButton.setAttribute('aria-pressed', String(!higherLower && !wordGame));
+      higherLowerLeaderboardButton.setAttribute('aria-pressed', String(higherLower));
+      wordLeaderboardButton.setAttribute('aria-pressed', String(wordGame));
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character]));
+    }
+
+    function applyState(state) {
+      latestState = state;
+      moves = state.moves;
+      gameOver = state.completed;
+      hasName = Boolean(state.name);
+      creatorBadge.classList.toggle('view-hidden', !state.isCreator);
+      menuCreatorBadge.classList.toggle('view-hidden', !state.isCreator);
+      playerName.value = state.name || '';
+      menuName.value = state.name || '';
+      settingsName.value = state.name || '';
+      menuStatus.textContent = state.name ? 'Signed in as ' + state.name : 'Choose a name to begin.';
+      playButton.disabled = !hasName;
+      higherLowerButton.disabled = !hasName;
+      wordGameButton.disabled = !hasName;
+      moveCount.textContent = String(moves);
+      rangeHint.textContent = '1 — 100';
+      roundNumber.textContent = state.date.slice(5).replace('-', '/');
+      leaderboardDate.textContent = state.date;
+      renderHistory(state.guesses);
+      renderLeaderboard(state.leaderboard);
+      renderMenuLeaderboard();
+      input.disabled = !hasName;
+      resetButton.disabled = false;
+      if (gameOver) {
+        showMessage('You found it.', 'Your score is on today\'s board.', 'success');
+      } else if (hasName) {
+        showMessage(moves ? 'Keep narrowing it down.' : 'What is your first guess?', moves ? 'Your daily round is still in play.' : 'Every attempt gets you closer.');
+      } else {
+        showMessage('Choose your player name.', 'You get one daily round, so make it count.');
+      }
+    }
+
+    function addToHistory(guess, hint) {
+      const empty = history.querySelector('.empty-history');
+      if (empty) empty.remove();
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = '<span>Move ' + moves + ' &nbsp;·&nbsp; ' + guess + '</span><span>' + hint + '</span>';
+      history.prepend(item);
+    }
+
+    async function saveProfile(name) {
+      try {
+        const state = await request('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, creatorCode: creatorCode.value }) });
+        applyState(state);
+        menuStatus.textContent = 'Signed in as ' + state.name;
+      } catch (error) {
+        menuStatus.textContent = error.message;
+      }
+    }
+
+    menuProfileForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      saveProfile(menuName.value);
+    });
+
+    renameButton.addEventListener('click', function () {
+      saveProfile(settingsName.value);
+    });
+
+    settingsButton.addEventListener('click', function () {
+      settingsPanel.classList.toggle('view-hidden');
+    });
+
+    leaderboardButton.addEventListener('click', function () {
+      menuLeaderboard.classList.toggle('view-hidden');
+      renderMenuLeaderboard();
+    });
+
+    rangefinderLeaderboardButton.addEventListener('click', function () {
+      menuLeaderboardMode = 'rangefinder';
+      renderMenuLeaderboard();
+    });
+
+    higherLowerLeaderboardButton.addEventListener('click', function () {
+      menuLeaderboardMode = 'higherLower';
+      renderMenuLeaderboard();
+    });
+
+    playButton.addEventListener('click', function () {
+      if (!hasName) return;
+      menuView.classList.add('view-hidden');
+      gameView.classList.remove('view-hidden');
+      gameHeader.classList.remove('view-hidden');
+      input.focus();
+    });
+
+    function renderHigherLower(state) {
+      higherNumber.textContent = state.current || '--';
+      higherScore.textContent = state.score;
+      higherButton.disabled = state.completed;
+      lowerButton.disabled = state.completed;
+      const lostChain = state.history.length && !state.history[state.history.length - 1].correct;
+      creatorRetryButton.classList.toggle('view-hidden', !(state.completed && lostChain));
+      higherHistory.innerHTML = state.history.slice().reverse().map((item) => item.from + ' → ' + item.to + ' (' + (item.correct ? item.prediction + ', correct' : item.prediction + ', game over') + ')').join('<br>');
+      higherMessage.textContent = state.completed ? 'Round over. Your first score is on today\'s board.' : 'Will the next number be higher or lower?';
+    }
+
+    higherLowerButton.addEventListener('click', function () {
+      if (!hasName) return;
+      menuView.classList.add('view-hidden');
+      higherLowerView.classList.remove('view-hidden');
+      gameHeader.classList.remove('view-hidden');
+      request('/api/state').then((state) => renderHigherLower(state.higherLower));
+    });
+
+    wordGameButton.addEventListener('click', function () {
+      if (!hasName) return;
+      menuView.classList.add('view-hidden');
+      wordGameView.classList.remove('view-hidden');
+      gameHeader.classList.remove('view-hidden');
+      request('/api/state').then((state) => renderWordGame(state.wordGame, false));
+    });
+
+    function renderWordGame(state, revealResult) {
+      wordDisplay.textContent = state.current || '--';
+      wordScore.textContent = state.score;
+      newWordButton.disabled = state.completed;
+      seenWordButton.disabled = state.completed;
+      wordRetryButton.classList.toggle('view-hidden', !state.completed);
+      wordHistory.innerHTML = revealResult && state.lastResult ? state.lastResult.word + ' (' + (state.lastResult.correct ? 'correct' : 'missed') + ')' : '';
+      wordMessage.textContent = state.completed ? 'Round over. Your first score is on today\'s board.' : 'Has this word appeared before?';
+    }
+
+    async function answerWord(answer) {
+      if (!hasName) return;
+      try {
+        const result = await request('/api/word-game', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer }) });
+        renderWordGame(result.state, true);
+        wordMessage.textContent = result.correct ? 'Correct. Keep watching.' : 'Wrong answer. Try another round.';
+      } catch (error) {
+        if (error.body && error.body.state) renderWordGame(error.body.state, false);
+        wordMessage.textContent = error.message;
+      }
+    }
+
+    newWordButton.addEventListener('click', () => answerWord('new'));
+    seenWordButton.addEventListener('click', () => answerWord('seen'));
+
+    wordRetryButton.addEventListener('click', async function () {
+      try {
+        renderWordGame(await request('/api/word-game/retry', { method: 'POST' }), false);
+        wordMessage.textContent = 'Has this word appeared before?';
+      } catch (error) {
+        wordMessage.textContent = error.message;
+      }
+    });
+
+    wordMenuButton.addEventListener('click', function () {
+      wordGameView.classList.add('view-hidden');
+      gameHeader.classList.add('view-hidden');
+      menuView.classList.remove('view-hidden');
+    });
+
+    async function makePrediction(prediction) {
+      if (!hasName) return;
+      try {
+        const result = await request('/api/higher-lower', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prediction }) });
+        renderHigherLower(result.state);
+        higherMessage.textContent = result.correct ? 'Correct. Keep the chain alive.' : 'Wrong prediction. Your final streak was ' + result.state.score + '.';
+      } catch (error) {
+        if (error.body && error.body.state) renderHigherLower(error.body.state.higherLower || error.body.state);
+        higherMessage.textContent = error.message;
+      }
+    }
+
+    higherButton.addEventListener('click', () => makePrediction('higher'));
+    lowerButton.addEventListener('click', () => makePrediction('lower'));
+
+    creatorRetryButton.addEventListener('click', async function () {
+      try {
+        const state = await request('/api/higher-lower/retry', { method: 'POST' });
+        renderHigherLower(state);
+        higherMessage.textContent = 'Fresh chain. Will the next number be higher or lower?';
+      } catch (error) {
+        higherMessage.textContent = error.message;
+      }
+    });
+
+    higherMenuButton.addEventListener('click', function () {
+      higherLowerView.classList.add('view-hidden');
+      gameHeader.classList.add('view-hidden');
+      menuView.classList.remove('view-hidden');
+    });
+
+    menuButton.addEventListener('click', function () {
+      gameView.classList.add('view-hidden');
+      higherLowerView.classList.add('view-hidden');
+      wordGameView.classList.add('view-hidden');
+      gameHeader.classList.add('view-hidden');
+      menuView.classList.remove('view-hidden');
+    });
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (!hasName) return;
+      const guess = Number(input.value);
+      if (!Number.isInteger(guess) || guess < 1 || guess > 100) {
+        showMessage('Keep it between 1 and 100.', 'That guess cannot join this round.', 'warning');
+        input.select();
+        return;
+      }
+
+      try {
+        const result = await request('/api/guess', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guess }) });
+        applyState(result.state);
+        if (result.correct) showMessage('You found it.', 'Your score is on today\'s board.', 'success');
+        else showMessage(result.hint + '.', result.hint === 'Go higher' ? 'The hidden number is above ' + guess + '.' : 'The hidden number is below ' + guess + '.', 'warning');
+      } catch (error) {
+        if (error.body && error.body.state) applyState(error.body.state);
+        showMessage('Round unavailable.', error.message, 'warning');
+      }
+      input.value = '';
+      if (hasName) input.focus();
+    });
+
+    resetButton.addEventListener('click', function () {
+      gameView.classList.add('view-hidden');
+      gameHeader.classList.add('view-hidden');
+      menuView.classList.remove('view-hidden');
+    });
+
+    function applySettings() {
+      document.documentElement.style.setProperty('--brightness', brightnessControl.value / 100);
+      document.body.classList.toggle('reduce-motion', motionControl.checked);
+      localStorage.setItem('rangefinder-settings', JSON.stringify({ brightness: brightnessControl.value, reduceMotion: motionControl.checked }));
+    }
+
+    const savedSettings = JSON.parse(localStorage.getItem('rangefinder-settings') || '{}');
+    brightnessControl.value = savedSettings.brightness || 100;
+    motionControl.checked = Boolean(savedSettings.reduceMotion);
+    brightnessControl.addEventListener('input', applySettings);
+    motionControl.addEventListener('change', applySettings);
+    applySettings();
+
+    request('/api/state').then(applyState).catch(() => {
+      showMessage('Server unavailable.', 'Start the game with "python server.py".', 'warning');
+      input.disabled = true;
+    });
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  </script>
+</body>
+</html>
